@@ -17,12 +17,14 @@ Developed a computer vision model to automatically detect defects in industrial 
 <img width="1600" height="1200" alt="Image" src="https://github.com/user-attachments/assets/95b04a61-6258-43cf-b64d-f1978276a19d" />
 
 ### Validation Predictions
+<img width="1773" height="663" alt="Image" src="https://github.com/user-attachments/assets/dd9ad5fd-87b0-431a-afc9-ae170220d93b" />
+
 <img width="1480" height="1180" alt="Image" src="https://github.com/user-attachments/assets/c967d6f7-99c4-4e91-aed4-263a7c3c14d5" />
 
 ### Training History
-<img width="1773" height="663" alt="Image" src="https://github.com/user-attachments/assets/dd9ad5fd-87b0-431a-afc9-ae170220d93b" />
 
 
+<img width="827" height="476" alt="Image" src="https://github.com/user-attachments/assets/88b1e64a-2d69-432f-9c76-ad732bc12960" />
 <img width="1255" height="455" alt="Image" src="https://github.com/user-attachments/assets/3d2b667d-140e-4a4b-9f93-495fbde0a505" />
 
 ## Tech Stack
