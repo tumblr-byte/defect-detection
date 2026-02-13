@@ -59,7 +59,7 @@ python test.py
 
 - Base: ResNet-18 (pretrained on ImageNet)
 - Modified final layer for binary classification
-- Optimizer: SGD (lr=0.001, weight_decay=1e-4)
+- Optimizer: Adam (lr=0.001, weight_decay=1e-4)
 - Loss: CrossEntropyLoss
 - Early stopping with patience=10
 
