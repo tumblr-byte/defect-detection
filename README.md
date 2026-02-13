@@ -65,7 +65,7 @@ python test.py
 
 ## Key Features
 
-- **Data Augmentation**: Random rotation, horizontal flip, color jitter
+
 - **Early Stopping**: Prevents overfitting
 - **Transfer Learning**: Leverages ImageNet pretrained weights
 - **Validation**: Held-out test set for unbiased evaluation
