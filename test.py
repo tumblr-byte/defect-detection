@@ -12,7 +12,8 @@ from torchvision import models
 valid_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=(0.41, 0.42, 0.43), std=(0.32, 0.31, 0.33))
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                     std=[0.229, 0.224, 0.225])
 ])
 
 #Dataset 
@@ -102,5 +103,6 @@ def show_predictions(model, dataset, device, num_images=12):
     plt.suptitle('Defect Detection - Model Predictions on Validation Set')
     plt.tight_layout()
     plt.show()
+
 
 show_predictions(model, valid_dataset, device, num_images=12)
