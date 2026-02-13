@@ -10,41 +10,42 @@ import torch.nn as nn
 from torchvision import models
 
 
-
-base_path = #path of your dataset
-
+# Path to your dataset (update this with your actual path)
+base_path = " "
 train_path = os.path.join(base_path, 'train')
 valid_path = os.path.join(base_path, 'test')
 
 
-# Transforms 
+# Data augmentation and normalization for training
 train_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
-    transforms.RandomRotation(degrees=14),
-    transforms.RandomHorizontalFlip(),
-    transforms.ColorJitter(brightness=0.3, saturation=0.2, hue=0.1),
     transforms.ToTensor(),
-    transforms.Normalize(mean=(0.41, 0.42, 0.43), std=(0.32, 0.31, 0.33))
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                     std=[0.229, 0.224, 0.225])
 ])
 
+# Only normalization for validation
 valid_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=(0.41, 0.42, 0.43), std=(0.32, 0.31, 0.33))
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+                     std=[0.229, 0.224, 0.225])
 ])
 
 
-# Dataset 
+# Custom Dataset class for defect detection
 class Defect(Dataset):
     def __init__(self, folder_path, transforms=None):
         self.folder_path = folder_path
         self.transforms = transforms
         self.files = []
         self.labels = []
-
+        
+        # Define class names (defective front and OK front)
         self.class_names = ["def_front", "ok_front"]
         self.cls_to_int = {cls: idx for idx, cls in enumerate(self.class_names)}
-
+        
+        # Load all images from both classes
         for class_name in self.class_names:
             class_folder_path = os.path.join(folder_path, class_name)
             for img_name in os.listdir(class_folder_path):
@@ -66,23 +67,31 @@ class Defect(Dataset):
         return image, label
 
 
-# DataLoader 
+# Create datasets
 train_dataset = Defect(train_path, train_transforms)
 valid_dataset = Defect(valid_path, valid_transforms)
 
+# Create data loaders
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
 valid_loader = DataLoader(valid_dataset, batch_size=8)
 
 
 # Model
-model = models.resnet18(pretrained=True)
+model = models.resnet18(weights=models.ResNet18_Weights.DEFAULT)
+
+# Modify the final layer for binary classification
 in_features = model.fc.in_features
 model.fc = nn.Linear(in_features, 2)
+
+# Move model to GPU if available
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
-optimizer = torch.optim.SGD(model.parameters(), lr=0.001, weight_decay=1e-4)
+
+# Define optimizer and loss function
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
 criterion = nn.CrossEntropyLoss()
 
+#calculate_acc
 def cal_acc(true, pred):
     pred = torch.argmax(pred, dim=1)
     acc = (true == pred).float().mean().item()
@@ -100,6 +109,7 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
     counter = 0
 
     for epoch in range(epochs):
+        # Training phase
         model.train()
         train_loss = 0
         train_acc = 0
@@ -108,9 +118,11 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
             image = image.to(device)
             label = label.to(device)
 
+            # Forward pass
             output = model(image)
             loss = criterion(output, label)
-
+            
+            # Backward pass
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -118,12 +130,14 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
             train_loss += loss.item()
             train_acc += cal_acc(label, output)
 
+        # Calculate average training metrics
         train_loss /= len(train_loader)
         train_acc /= len(train_loader)
 
         history["train_loss"].append(train_loss)
         history["train_acc"].append(train_acc)
 
+        # Validation phase
         model.eval()
         valid_loss = 0
         valid_acc = 0
@@ -139,6 +153,7 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
                 valid_loss += loss.item()
                 valid_acc += cal_acc(label, output)
 
+        # Calculate average validation metrics
         valid_loss /= len(valid_loader)
         valid_acc /= len(valid_loader)
 
@@ -147,7 +162,7 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
 
         print(f"{epoch + 1}/{epochs}, train_loss: {train_loss:.4f}, valid_loss: {valid_loss:.4f}, train_acc: {train_acc:.4f}, valid_acc: {valid_acc:.4f}")
 
-       
+        # Early stopping check
         if valid_loss <= best_loss:
             best_loss = valid_loss
             torch.save(model.state_dict(), output_path)
@@ -162,6 +177,6 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
             break
 
 
+# Train the model
+run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth")
 
-run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth"
-)
