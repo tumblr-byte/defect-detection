@@ -5,6 +5,8 @@ from PIL import Image
 import torch.nn as nn
 from torchvision import models
 import numpy as np
+import os
+import urllib.request
 
 # Page configuration
 st.set_page_config(
@@ -17,15 +19,42 @@ st.set_page_config(
 st.title("🔍 Industrial Defect Detection")
 st.markdown("Upload an image of a casting product to detect defects")
 
+# Model download function
+def download_model():
+    """Download model from GitHub releases if not present"""
+    model_path = "best.pth"
+    
+    if not os.path.exists(model_path):
+        st.info("📥 Downloading model from GitHub... (this may take a moment)")
+        
+        # TODO: Update this URL with your actual GitHub release URL
+        # After uploading to GitHub releases, replace with:
+        # model_url = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/best.pth"
+        model_url = "https://github.com/tumblr-byte/defect-detection/releases/download/v1.0.0/best.pth"
+        
+        try:
+            with st.spinner("Downloading model..."):
+                urllib.request.urlretrieve(model_url, model_path)
+            st.success(" Model downloaded successfully!")
+        except Exception as e:
+            st.error(f" Failed to download model: {e}")
+            st.info("Please manually download 'best.pth' from GitHub releases and place it in the same directory.")
+            st.stop()
+    
+    return model_path
+
 # Load model
 @st.cache_resource
 def load_model():
+    # Download model if needed
+    model_path = download_model()
+    
     model = models.resnet18(pretrained=False)
     in_features = model.fc.in_features
     model.fc = nn.Linear(in_features, 2)
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model.load_state_dict(torch.load("best.pth", map_location=device))
+    model.load_state_dict(torch.load(model_path, map_location=device))
     model = model.to(device)
     model.eval()
     
