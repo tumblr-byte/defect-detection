@@ -17,9 +17,7 @@ base_path = path_dir
 train_path = os.path.join(base_path, 'train')
 original_test_path = os.path.join(base_path, 'test')
 
-# Create valid and test directories
-valid_path = os.path.join(base_path, 'valid')
-test_path = os.path.join(base_path, 'test_final')
+
 
 
 # Get all files from original test folder
@@ -217,3 +215,4 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
 
 history = run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth")
 print("\nTraining complete!")
+
