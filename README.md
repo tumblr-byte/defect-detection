@@ -48,9 +48,9 @@ This balance is crucial—we catch 99% of defects while never rejecting good par
 
 ### Classification Report
 
-```
+
 <img width="613" height="341" alt="Image" src="https://github.com/user-attachments/assets/cced31c2-afcc-4f3a-97b0-f9bcb2c7124f" />
-```
+
 
 ## Dataset
 
@@ -283,11 +283,7 @@ pip install -r requirements.txt
 ```
 
 3. **Download dataset**
-```bash
-# Download from Kaggle
-kaggle datasets download -d ravirajsinh45/real-life-industrial-dataset-of-casting-product
-unzip real-life-industrial-dataset-of-casting-product.zip -d data/
-```
+**Source:** [Kaggle - Real-Life Industrial Casting Dataset](https://www.kaggle.com/datasets/ravirajsinh45/real-life-industrial-dataset-of-casting-product)
 
 ### Training
 
