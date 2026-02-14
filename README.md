@@ -17,6 +17,13 @@ This project automates quality inspection for submersible pump impellers in the 
 
 ---
 
+## Live Demo
+
+Try the model yourself: **[https://detectingdefect.streamlit.app/](https://detectingdefect.streamlit.app/)**
+
+Upload an image of a casting product to get instant defect detection results.
+
+
 ## Results
 
 ### Performance Metrics
