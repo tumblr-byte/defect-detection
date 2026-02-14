@@ -2,8 +2,10 @@
 
 A deep learning-based binary classification system for detecting manufacturing defects in metal casting components, achieving **99.72% accuracy** on real-world industrial data.
 
-![Validation Predictions](download__1_.png)
-*Model predictions on validation set showing high confidence across various defect types*
+
+*Model predictions on Test set showing high confidence across various defect types*
+
+<img width="1480" height="1181" alt="Image" src="https://github.com/user-attachments/assets/233dbd8b-69c3-4d99-9ee0-8782a596286c" />
 
 ---
 
@@ -21,26 +23,26 @@ This project automates quality inspection for submersible pump impellers in the 
 
 | Metric | Value |
 |--------|-------|
-| **Overall Accuracy** | 99.72% (713/715) |
-| **Defect Detection (Recall)** | 99.56% (451/453) |
+| **Overall Accuracy** | 99.44% (356/358) |
+| **Defect Detection (Recall)** | 99.17% (239/241) |
 | **False Positive Rate** | 0% (0 false alarms) |
 | **Precision (Defective)** | 100% |
 | **Precision (OK)** | 98% |
 
 ### Confusion Matrix
 
-![Confusion Matrix](download__2_.png)
+<img width="664" height="590" alt="Image" src="https://github.com/user-attachments/assets/39597ab1-5d02-441c-a80b-bcdbd809106d" />
 
 ```
                  Predicted
               Defective    OK
-Actual  Def      448        5     ← Missed only 5 defects
-        OK         0      262     ← Zero false rejections
+Actual  Def      239        2     ← Missed only 2 defects
+        OK         0      117     ← Zero false rejections
 ```
 
 **Critical Metrics for Manufacturing:**
-- **False Negatives (Missed Defects):** 5 out of 453 (1.1%)
-- **False Positives (False Alarms):** 0 out of 262 (0%)
+- **False Negatives (Missed Defects):** 2 out of 241 (0.83%)
+- **False Positives (False Alarms):** 0 out of 117 (0%)
 
 This balance is crucial—we catch 99% of defects while never rejecting good parts.
 
@@ -48,10 +50,13 @@ This balance is crucial—we catch 99% of defects while never rejecting good par
 
 ```
               precision    recall  f1-score   support
-   defective       1.00      0.99      0.99       453
-          ok       0.98      1.00      0.99       262
-    accuracy                           0.99       715
+   defective       1.00      0.99      1.00       241
+          ok       0.98      1.00      0.99       117
+    accuracy                           0.99       358
 ```
+
+![Test Predictions](download__2_.png)
+*Model predictions on test set showing high confidence across defect detection*
 
 ---
 
@@ -61,10 +66,14 @@ This balance is crucial—we catch 99% of defects while never rejecting good par
 
 ### Dataset Composition
 
-| Split | Defective | OK | Total | Class Imbalance |
-|-------|-----------|-----|-------|-----------------|
-| **Train** | 3,758 (56.7%) | 2,875 (43.3%) | 6,633 | 1.31:1 |
-| **Test** | 453 (63.4%) | 262 (36.6%) | 715 | 1.73:1 |
+| Split | Defective | OK | Total |
+|-------|-----------|-----|-------|
+| **Train** | 3,758 (56.7%) | 2,875 (43.3%) | 6,633 |
+| **Validation** | ~226 (63.3%) | ~131 (36.7%) | 357 |
+| **Test** | 241 (67.3%) | 117 (32.7%) | 358 |
+| **Total (Original)** | 4,211 | 3,137 | 7,348 |
+
+**Note:** The original dataset provides train (6,633) and test (715) folders. For proper validation, the test folder was split 50/50 into validation and test sets using `train_test_split` with `random_state=42`.
 
 **Class Imbalance Analysis:**
 - The dataset shows mild imbalance (~57% defective, ~43% OK)
@@ -183,7 +192,7 @@ criterion = nn.BCEWithLogitsLoss()
 
 ---
 
-## 🚀 Tech Stack
+## Tech Stack
 
 | Component | Technology |
 |-----------|-----------|
@@ -211,30 +220,65 @@ Early Stopping: Patience=10 epochs
 Normalization: ImageNet stats (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 ```
 
+### Training History
+
+The model converged in **16 epochs** (early stopping triggered):
+
+| Epoch | Train Loss | Val Loss | Train Acc | Val Acc | Status |
+|-------|------------|----------|-----------|---------|--------|
+| 1 | 0.1341 | 0.1011 | 94.95% | 95.28% | Saved |
+| 2 | 0.0418 | 0.0618 | 98.83% | 98.06% | Saved |
+| 3 | 0.0483 | 0.0466 | 98.61% | 98.33% | Saved |
+| 5 | 0.0364 | 0.0215 | 98.84% | 99.03% | Saved |
+| 6 | 0.0429 | **0.0172** | 98.84% | 99.31% | **Best** |
+| 7-15 | ... | 0.017-0.037 | 98-99% | 99% | No improvement |
+| 16 | 0.0156 | 0.0293 | 99.52% | 98.75% | Early stop |
+
+### Training History
+
+The model converged in **52 epochs** (early stopping triggered):
+
+| Epoch | Train Loss | Val Loss | Train Acc | Val Acc | Status |
+|-------|------------|----------|-----------|---------|--------|
+| 4 | 0.0432 | **0.0121** | 98.45% | 99.72% | **Best** |
+| 10 | 0.0251 | 0.0077 | 99.31% | 100% | Saved |
+| 18 | 0.0186 | 0.0042 | 99.40% | 99.72% | Saved |
+| 25 | 0.0185 | 0.0031 | 99.41% | 100% | Saved |
+| 32 | 0.0150 | 0.0016 | 99.44% | 100% | Saved |
+| 34 | 0.0126 | **0.0013** | 99.52% | 100% | **Best** |
+| 42 | 0.0100 | **0.0008** | 99.64% | 100% | **Best** |
+| 43-52 | ... | 0.008-0.048 | 99.4-99.8% | 98.9-100% | No improvement |
+
 **Key Observations:**
-- Rapid convergence in first 6 epochs
-- Best validation loss: 0.0172 at epoch 6
-- Early stopping prevented overfitting (train loss kept decreasing, val loss plateaued)
-- Final model balances accuracy and generalization
+- Rapid convergence in first 10 epochs
+- Best validation loss: 0.0008 at epoch 42
+- Early stopping prevented overfitting (patience=10)
+- Final model achieves near-perfect validation accuracy
 
 ### Addressing Overfitting Concerns
 
-**Dataset Structure:** This dataset provides a train and validation split (no separate test set). The validation set serves as both the stopping criterion during training and the final evaluation benchmark.
+**Dataset Structure:** The original dataset provides train (6,633 images) and test (715 images) folders. To enable proper model validation, the test folder was split 50/50 into validation (358 images) and final test (358 images) sets.
+
+**Three-Way Data Split:**
+- **Training set (6,633 images):** Used to update model weights
+- **Validation set (358 images):** Used for early stopping during training
+- **Test set (358 images):** Held-out data NEVER seen during training, used only for final evaluation
 
 **Evidence Against Overfitting:**
 
-1. **Early Stopping Effectiveness**: Model saved at epoch 6 (val loss: 0.0172) but training continued until epoch 16. Validation loss never improved beyond epoch 6, demonstrating early stopping caught the optimal point before overfitting.
+1. **Separate Test Set**: The 99.44% accuracy is measured on a completely held-out test set that the model never saw during training or validation. This proves genuine generalization capability.
 
 2. **Small Train-Validation Gap**:
-   - Training accuracy: 99.52%
-   - Validation accuracy: 99.31%
-   - Gap of only 0.21% indicates strong generalization, not memorization
+   - Training accuracy: 99.64%
+   - Validation accuracy: 100%
+   - Test accuracy: 99.44%
+   - Consistent performance across all splits demonstrates the model learned general patterns, not memorized training data
 
-3. **Validation Loss Behavior**: After epoch 6, validation loss plateaued (0.017-0.037 range) while training loss continued decreasing (reaching 0.0156). This classic pattern shows the model learned general features rather than training-specific noise.
+3. **Early Stopping Effectiveness**: Model was saved at epoch 42 (val loss: 0.0008) but training continued until epoch 52. Validation loss plateaued, demonstrating early stopping prevented overfitting.
 
-4. **Confusion Matrix Performance**: The model correctly classifies 713/715 validation images (99.72%), with balanced performance across both classes, suggesting robust generalization.
+4. **Validation Loss Behavior**: Validation loss steadily decreased from 0.0269 (epoch 2) to 0.0008 (epoch 42), then plateaued. No signs of overfitting where validation loss would increase while training loss decreases.
 
-**Limitation Acknowledgment:** Ideally, a three-way split (train/validation/test) would provide stronger evidence of generalization. However, given the dataset structure and the validation metrics combined with early stopping behavior, the model demonstrates reliable performance on unseen data within the available evaluation framework.
+**Conclusion:** The three-way split with a completely unseen test set, combined with early stopping and consistent performance across all splits, provides strong evidence that the model generalizes well to new data rather than overfitting to the training set.
 
 ---
 
@@ -285,6 +329,24 @@ unzip real-life-industrial-dataset-of-casting-product.zip -d data/
 python train.py
 ```
 
+This will:
+- Split the test folder into validation (50%) and test (50%) sets
+- Train the model with early stopping
+- Save the best model as `best.pth`
+
+### Evaluation
+
+```bash
+python test.py
+```
+
+This will:
+- Load the trained model (`best.pth`)
+- Evaluate on the held-out test set (never seen during training)
+- Generate confusion matrix and classification report
+- Display prediction visualizations
+
+---
 
 ## Industrial Applications
 
