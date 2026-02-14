@@ -30,14 +30,14 @@ def download_model():
         # TODO: Update this URL with your actual GitHub release URL
         # After uploading to GitHub releases, replace with:
         # model_url = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/download/v1.0.0/best.pth"
-        model_url = "https://github.com/tumblr-byte/defect-detection/releases/download/v1.0.0/best.pth"
+        model_url = "https://github.com/yourusername/defect-detection/releases/download/v1.0.0/best.pth"
         
         try:
             with st.spinner("Downloading model..."):
                 urllib.request.urlretrieve(model_url, model_path)
-            st.success(" Model downloaded successfully!")
+            st.success("✅ Model downloaded successfully!")
         except Exception as e:
-            st.error(f" Failed to download model: {e}")
+            st.error(f"❌ Failed to download model: {e}")
             st.info("Please manually download 'best.pth' from GitHub releases and place it in the same directory.")
             st.stop()
     
@@ -86,9 +86,9 @@ def predict(model, image_tensor, device):
 # Load model
 try:
     model, device = load_model()
-    st.success("Model loaded successfully!")
+    st.success("✅ Model loaded successfully!")
 except Exception as e:
-    st.error(f"Error loading model: {e}")
+    st.error(f"❌ Error loading model: {e}")
     st.stop()
 
 # File uploader
@@ -126,8 +126,8 @@ if uploaded_file is not None:
         
         # Show probabilities
         st.subheader("Class Probabilities")
-        st.progress(probabilities[0], text=f"Defective: {probabilities[0]*100:.2f}%")
-        st.progress(probabilities[1], text=f"OK: {probabilities[1]*100:.2f}%")
+        st.progress(float(probabilities[0]), text=f"Defective: {probabilities[0]*100:.2f}%")
+        st.progress(float(probabilities[1]), text=f"OK: {probabilities[1]*100:.2f}%")
     
     # Additional info
     st.divider()
