@@ -1,4 +1,5 @@
-import os 
+import os
+import shutil
 import torch
 import torchvision.transforms as transforms
 from torch.utils.data import Dataset, DataLoader
@@ -8,19 +9,39 @@ from PIL import Image
 import numpy as np
 import torch.nn as nn
 from torchvision import models
+from sklearn.model_selection import train_test_split
 
 
 # Path to your dataset (update this with your actual path)
-base_path = " "
+base_path = path_dir
 train_path = os.path.join(base_path, 'train')
-valid_path = os.path.join(base_path, 'test')
+original_test_path = os.path.join(base_path, 'test')
+
+# Create valid and test directories
+valid_path = os.path.join(base_path, 'valid')
+test_path = os.path.join(base_path, 'test_final')
+
+
+# Get all files from original test folder
+all_test_files = []
+for class_name in ['def_front', 'ok_front']:
+    class_folder = os.path.join(original_test_path, class_name)
+    for img_name in os.listdir(class_folder):
+        all_test_files.append(os.path.join(class_folder, img_name))
+
+# Simple split: 50% valid, 50% test
+valid_files, test_files = train_test_split(all_test_files, test_size=0.5, random_state=42)
+
+print(f"Total test files: {len(all_test_files)}")
+print(f"Valid files: {len(valid_files)}")
+print(f"Test files: {len(test_files)}")
 
 
 # Data augmentation and normalization for training
 train_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
                      std=[0.229, 0.224, 0.225])
 ])
 
@@ -28,30 +49,37 @@ train_transforms = transforms.Compose([
 valid_transforms = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], 
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
                      std=[0.229, 0.224, 0.225])
 ])
 
 
 # Custom Dataset class for defect detection
 class Defect(Dataset):
-    def __init__(self, folder_path, transforms=None):
-        self.folder_path = folder_path
+    def __init__(self, folder_path=None, file_list=None, transforms=None):
         self.transforms = transforms
         self.files = []
         self.labels = []
-        
-        # Define class names (defective front and OK front)
         self.class_names = ["def_front", "ok_front"]
         self.cls_to_int = {cls: idx for idx, cls in enumerate(self.class_names)}
-        
-        # Load all images from both classes
-        for class_name in self.class_names:
-            class_folder_path = os.path.join(folder_path, class_name)
-            for img_name in os.listdir(class_folder_path):
-                image_path = os.path.join(class_folder_path, img_name)
-                self.files.append(image_path)
-                self.labels.append(class_name)
+
+        if file_list is not None:
+            # Use provided file list
+            self.files = file_list
+            # Extract labels from file paths
+            for filepath in file_list:
+                if 'def_front' in filepath:
+                    self.labels.append('def_front')
+                else:
+                    self.labels.append('ok_front')
+        else:
+            # Load from folder path (original behavior)
+            for class_name in self.class_names:
+                class_folder_path = os.path.join(folder_path, class_name)
+                for img_name in os.listdir(class_folder_path):
+                    image_path = os.path.join(class_folder_path, img_name)
+                    self.files.append(image_path)
+                    self.labels.append(class_name)
 
     def __len__(self):
         return len(self.files)
@@ -67,9 +95,14 @@ class Defect(Dataset):
         return image, label
 
 
+
+
+
 # Create datasets
-train_dataset = Defect(train_path, train_transforms)
-valid_dataset = Defect(valid_path, valid_transforms)
+train_dataset = Defect(folder_path=train_path, transforms=train_transforms)
+valid_dataset = Defect(file_list=valid_files, transforms=valid_transforms)
+test_dataset = Defect(file_list=test_files, transforms=valid_transforms)
+
 
 # Create data loaders
 train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
@@ -91,11 +124,13 @@ model = model.to(device)
 optimizer = torch.optim.Adam(model.parameters(), lr=0.001, weight_decay=1e-4)
 criterion = nn.CrossEntropyLoss()
 
-#calculate_acc
+
+# Calculate accuracy
 def cal_acc(true, pred):
     pred = torch.argmax(pred, dim=1)
     acc = (true == pred).float().mean().item()
     return round(acc, 4)
+
 
 def run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth"):
     history = {
@@ -121,7 +156,7 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
             # Forward pass
             output = model(image)
             loss = criterion(output, label)
-            
+
             # Backward pass
             optimizer.zero_grad()
             loss.backward()
@@ -176,7 +211,9 @@ def run_model(model, criterion, optimizer, device, train_loader, valid_loader, e
             print("early stopping triggered")
             break
 
+    return history
 
-# Train the model
-run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth")
 
+
+history = run_model(model, criterion, optimizer, device, train_loader, valid_loader, epochs=100, patience=10, output_path="best.pth")
+print("\nTraining complete!")
