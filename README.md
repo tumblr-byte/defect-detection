@@ -285,66 +285,6 @@ unzip real-life-industrial-dataset-of-casting-product.zip -d data/
 python train.py
 ```
 
-**Expected Output:**
-```
-Downloading ResNet-18 pretrained weights...
-100%|██████████| 44.7M/44.7M [00:00<00:00]
-
-Epoch 1/100
-100%|██████████| 415/415 [00:39<00:00]
-train_loss: 0.1341, valid_loss: 0.1011, train_acc: 0.9495, valid_acc: 0.9528
-✅ Model saved
-
-...
-
-Early stopping triggered at epoch 16
-Best model: epoch 6 (val_loss: 0.0172)
-```
-
-### Evaluation
-
-```bash
-python test.py
-```
-
-Generates:
-- Confusion matrix plot
-- Classification report
-- Sample predictions visualization (12 random images)
-
-### Inference on New Images
-
-```python
-from PIL import Image
-import torch
-from torchvision import transforms
-
-# Load model
-model.load_state_dict(torch.load("best.pth"))
-model.eval()
-
-# Prepare image
-transform = transforms.Compose([
-    transforms.Resize((224, 224)),
-    transforms.ToTensor(),
-    transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-])
-
-image = Image.open("test_impeller.jpg").convert("RGB")
-image_tensor = transform(image).unsqueeze(0).to(device)
-
-# Predict
-with torch.no_grad():
-    output = model(image_tensor)
-    probabilities = torch.softmax(output, dim=1)
-    predicted_class = torch.argmax(probabilities).item()
-    confidence = probabilities[0][predicted_class].item()
-
-classes = ["Defective", "OK"]
-print(f"Prediction: {classes[predicted_class]} ({confidence*100:.2f}% confidence)")
-```
-
----
 
 ## Industrial Applications
 
