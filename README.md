@@ -13,7 +13,7 @@ A deep learning-based binary classification system for detecting manufacturing d
 
 This project automates quality inspection for submersible pump impellers in the casting industry. Manual inspection is time-consuming, expensive, and prone to human error. Our CNN-based solution provides fast, accurate, and consistent defect detection.
 
-**Key Achievement:** The model correctly identifies 99.56% of defective parts while producing zero false rejections of good parts.
+**Key Achievement:** The model correctly identifies 99.17% of defective parts while producing zero false rejections of good parts.
 
 ---
 
@@ -49,16 +49,8 @@ This balance is crucial—we catch 99% of defects while never rejecting good par
 ### Classification Report
 
 ```
-              precision    recall  f1-score   support
-   defective       1.00      0.99      1.00       241
-          ok       0.98      1.00      0.99       117
-    accuracy                           0.99       358
+<img width="613" height="341" alt="Image" src="https://github.com/user-attachments/assets/cced31c2-afcc-4f3a-97b0-f9bcb2c7124f" />
 ```
-
-![Test Predictions](download__2_.png)
-*Model predictions on test set showing high confidence across defect detection*
-
----
 
 ## Dataset
 
@@ -196,7 +188,7 @@ criterion = nn.BCEWithLogitsLoss()
 
 | Component | Technology |
 |-----------|-----------|
-| **Framework** | PyTorch 2.x |
+| **Framework** | PyTorch |
 | **Model** | ResNet-18 (Transfer Learning) |
 | **Pretrained Weights** | ImageNet |
 | **Optimizer** | Adam (lr=0.001, weight_decay=1e-4) |
@@ -222,20 +214,6 @@ Normalization: ImageNet stats (mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.
 
 ### Training History
 
-The model converged in **16 epochs** (early stopping triggered):
-
-| Epoch | Train Loss | Val Loss | Train Acc | Val Acc | Status |
-|-------|------------|----------|-----------|---------|--------|
-| 1 | 0.1341 | 0.1011 | 94.95% | 95.28% | Saved |
-| 2 | 0.0418 | 0.0618 | 98.83% | 98.06% | Saved |
-| 3 | 0.0483 | 0.0466 | 98.61% | 98.33% | Saved |
-| 5 | 0.0364 | 0.0215 | 98.84% | 99.03% | Saved |
-| 6 | 0.0429 | **0.0172** | 98.84% | 99.31% | **Best** |
-| 7-15 | ... | 0.017-0.037 | 98-99% | 99% | No improvement |
-| 16 | 0.0156 | 0.0293 | 99.52% | 98.75% | Early stop |
-
-### Training History
-
 The model converged in **52 epochs** (early stopping triggered):
 
 | Epoch | Train Loss | Val Loss | Train Acc | Val Acc | Status |
@@ -257,11 +235,11 @@ The model converged in **52 epochs** (early stopping triggered):
 
 ### Addressing Overfitting Concerns
 
-**Dataset Structure:** The original dataset provides train (6,633 images) and test (715 images) folders. To enable proper model validation, the test folder was split 50/50 into validation (358 images) and final test (358 images) sets.
+**Dataset Structure:** The original dataset provides train (6,633 images) and test (715 images) folders. To enable proper model validation, the test folder was split 50/50 into validation (357 images) and final test (358 images) sets.
 
 **Three-Way Data Split:**
 - **Training set (6,633 images):** Used to update model weights
-- **Validation set (358 images):** Used for early stopping during training
+- **Validation set (357 images):** Used for early stopping during training
 - **Test set (358 images):** Held-out data NEVER seen during training, used only for final evaluation
 
 **Evidence Against Overfitting:**
@@ -287,7 +265,7 @@ The model converged in **52 epochs** (early stopping triggered):
 ### Prerequisites
 
 ```bash
-Python 3.8+
+Python 3.10+
 CUDA-capable GPU (optional but recommended)
 ```
 
@@ -295,25 +273,13 @@ CUDA-capable GPU (optional but recommended)
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/defect-detection.git
+git clone https://github.com/tumblr-byte/defect-detection.git
 cd defect-detection
 ```
 
 2. **Install dependencies**
 ```bash
 pip install -r requirements.txt
-```
-
-**requirements.txt:**
-```
-torch>=2.0.0
-torchvision>=0.15.0
-Pillow>=9.0.0
-numpy>=1.24.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-scikit-learn>=1.3.0
-tqdm>=4.65.0
 ```
 
 3. **Download dataset**
