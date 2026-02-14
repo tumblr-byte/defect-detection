@@ -3,7 +3,7 @@
 A deep learning-based binary classification system for detecting manufacturing defects in metal casting components, achieving **99.72% accuracy** on real-world industrial data.
 
 
-*Model predictions on Test set showing high confidence across various defect types*
+*Model predictions on test set showing high confidence in defect detection*
 
 <img width="1480" height="1181" alt="Image" src="https://github.com/user-attachments/assets/233dbd8b-69c3-4d99-9ee0-8782a596286c" />
 
